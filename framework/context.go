@@ -28,9 +28,33 @@ func NewContext(r *http.Request, w http.ResponseWriter) *Context{
 	}
 }
 
+//#region base function
+
+func (ctx *Context) GetRequest() *http.Request{
+	return ctx.request
+}
+
+func (ctx *Context) GetResponse() http.ResponseWriter{
+	return ctx.responseWriter
+}
+
+func (ctx *Context) SetHasTimeout(){
+	ctx.hasTimeout = true
+}
+
+func (ctx *Context) HasTimeout() bool {
+	return ctx.hasTimeout
+}
+
+func (ctx *Context) WriterMux() *sync.Mutex {
+	return ctx.writerMux
+}
+
 func (ctx *Context) BaseContext() context.Context{
 	return ctx.request.Context()
 }
+
+//#endregion
 
 func (ctx *Context) Done() <-chan struct{}{
 	return ctx.BaseContext().Done()
