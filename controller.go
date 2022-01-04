@@ -41,14 +41,14 @@ func FooControllerHandler(c *framework.Context) error {
 
 	
 	select {
-		// 监听 panic
+		// 監聽 panic
 		// case  p := <-panicChan:
 		case  <-panicChan:
 			c.Json(500, "panic")
-		// 监听结束事件
+		// 監聽結束事件
 	  	case <-finish:
 			fmt.Println("finish")
-		// 监听超时事件
+		// 監聽超時事件
 	  	case <-durationCtx.Done():
 			c.Json(500, "time out")
 	  }
