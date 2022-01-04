@@ -13,6 +13,7 @@ func NewCore() *Core{
 	return &Core{}
 }
 
+//Core的鏈式函數宣告
 func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	//TODO
 }
