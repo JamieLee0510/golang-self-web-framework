@@ -8,7 +8,7 @@ import (
 func main(){
 	server := &http.Server{
 		Handler: framework.NewCore(),
-		Addr: ":8080",
+		Addr: ":8888",
 	}
 	server.ListenAndServe()
 }
