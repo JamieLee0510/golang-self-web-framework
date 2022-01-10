@@ -25,7 +25,7 @@ func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	log.Println("core.serveHTTP")
 	ctx := NewContext(request, response)
 
-	// 一个简单的路由选择器，这里直接写死为测试路由foo
+	/// 一個簡單的路由選擇器，這邊直接寫死測試路由foo
 	router := c.router["foo"]
 	if router == nil {
 		return
