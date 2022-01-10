@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+///在框架的整個樹形邏輯鏈條中，用上下文控制器Context，實現每個節點的信息傳遞與共享
+
+///聲明一個結構體類型 Context，有以下嵌入字段
 type Context struct{
 	request *http.Request 
 	responseWriter http.ResponseWriter
