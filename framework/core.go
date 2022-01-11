@@ -18,7 +18,7 @@ func NewCore() *Core{
 	getRouter := map[string]ControllerHandler{} 
 	postRouter := map[string]ControllerHandler{} 
 	putRouter := map[string]ControllerHandler{}
-	 deleteRouter := map[string]ControllerHandler{}
+	deleteRouter := map[string]ControllerHandler{}
 
 	//將二級map寫入一級map
 	 router := map[string]map[string]ControllerHandler{} 
@@ -28,6 +28,27 @@ func NewCore() *Core{
 	 router["DELETE"] = deleteRouter
 	return &Core{router: router}
 }
+
+//Core的鏈式函數宣告
+func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
+	log.Println("core.serveHTTP")
+	ctx := NewContext(request, response)
+
+	// 尋找路由
+	router := c.FindRouteByRequest(request) 
+	if router == nil { 
+		// 如果沒有找到，log 
+		ctx.Json(404, "not found") 
+		return 
+	}
+
+	// 調用路由函數，如果返回err 代表內部有錯，返回 status 500
+	if err := router(ctx); err != nil { 
+		ctx.Json(500, "inner error") 
+		return 
+	}
+}
+
 
 // #region 路由註冊
 
@@ -57,17 +78,24 @@ func (c *Core) Get(url string, handler ControllerHandler) {
 
 // #endregion
 
-//Core的鏈式函數宣告
-func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
-	log.Println("core.serveHTTP")
-	ctx := NewContext(request, response)
 
-	// 一个简单的路由选择器，这里直接写死为测试路由foo
-	router := c.router["foo"]
-	if router == nil {
-		return
+
+// 匹配路由，如果沒有匹配到，則return nil
+func (c *Core) FindRouteByRequest(request *http.Request) ControllerHandler {
+
+	uri := request.URL.Path
+	method := request.Method
+
+	// uri 和 method 全部轉換為大寫
+	upperMethod := strings.ToUpper(method)
+	upperUri := strings.ToUpper(uri)
+  
+	// 查找第一層map
+	if methodHandlers, ok := c.router[upperMethod]; ok {
+	  // 查找第二層map
+	  if handler, ok := methodHandlers[upperUri]; ok {
+		return handler
+	  }
 	}
-	log.Println("core.router")
-
-	router(ctx)
-}
+	return nil
+  }
