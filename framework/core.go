@@ -80,6 +80,7 @@ func (c *Core) Get(url string, handler ControllerHandler) {
 
 
 
+
 // 匹配路由，如果沒有匹配到，則return nil
 func (c *Core) FindRouteByRequest(request *http.Request) ControllerHandler {
 
