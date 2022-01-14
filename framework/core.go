@@ -29,9 +29,10 @@ func NewCore() *Core{
 	return &Core{router: router}
 }
 
-//Core的鏈式函數宣告
+//Core的成員函數宣告
 func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	log.Println("core.serveHTTP")
+	// 封裝自定義的context
 	ctx := NewContext(request, response)
 
 	// 尋找路由
