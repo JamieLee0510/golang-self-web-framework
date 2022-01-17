@@ -1,6 +1,9 @@
 package framework
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
 
 type Tree struct{
@@ -14,6 +17,19 @@ type node struct{
 	childs []*node // 這個節點下的子節點
 }
 
+
+func newNode() *node {
+	return &node{
+		isLast:  false,
+		segment: "",
+		childs:  []*node{},
+	}
+}
+
+func NewTree() *Tree {
+	root := newNode()
+	return &Tree{root}
+}
 
 
 // 判斷一個 segment 是否為通用的 segement
@@ -90,6 +106,76 @@ func (n *node) matchNode(uri string) *node{
 }
 
 
+// 增加路由節點
+func (tree *Tree) AddRouter(uri string, handler ControllerHandler) error{
+	n := tree.root
 
+	//確認路由是否衝突
+	if n.matchNode(uri) != nil{
+		return errors.New("router is exist: "+ uri)
+	}
+
+	segments := strings.Split(uri, "/")
+
+	// 對每一個segment
+	for index, segemt := range segments{
+
+		//最終進入segment的字段
+		if !isWildSegmemt(segemt){
+			segemt = strings.ToUpper(segemt)
+		}
+
+		isLast := index==len(segments) -1
+		
+		var objNode *node //標記是否有合適的子節點
+
+		childNodes := n.filterChildNodes(segemt)
+
+		//假如有匹配的子節點
+		if len(childNodes)>0{
+			// 假如有和 segment 相同的子節點，則選擇該節點
+			for _, cnode := range childNodes{
+				if cnode.segment == segemt{
+					objNode = cnode
+					break
+				}
+			}
+		}
+
+		//假如都沒有匹配到
+		if objNode == nil{
+			//創建一個當前的節點
+			cnode := newNode()
+			cnode.segment = segemt
+
+			if isLast{
+				cnode.isLast = true
+				cnode.handler = handler
+			}
+
+			n.childs = append(n.childs, cnode)
+			objNode = cnode
+		}
+
+		// ?? 為啥這邊還要把 n 改為 objNode
+		n = objNode
+	}
+	return nil
+}
+
+
+// 匹配uri
+func (tree *Tree) FindHandler(uri string) ControllerHandler{
+
+	//直接複用 matchNode函數
+	matchNode := tree.root.matchNode(uri)
+
+	if matchNode == nil{
+		return nil
+	}
+
+	return matchNode.handler
+
+}
 
 

@@ -8,24 +8,19 @@ import (
 
 //框架核心結構
 type Core struct{
-	router map[string]map[string]ControllerHandler //二級map
+	router map[string]*Tree // all routers
 }
 
 //初始化框架核心結構
 //回傳Core引用類型
 func NewCore() *Core{
-	//定義二級map
-	getRouter := map[string]ControllerHandler{} 
-	postRouter := map[string]ControllerHandler{} 
-	putRouter := map[string]ControllerHandler{}
-	deleteRouter := map[string]ControllerHandler{}
+	//初始化路由
+	router := map[string]*Tree{} 
+	router["GET"] = NewTree() 
+	router["POST"] = NewTree() 
+	router["PUT"] = NewTree() 
+	router["DELETE"] = NewTree() 
 
-	//將二級map寫入一級map
-	 router := map[string]map[string]ControllerHandler{} 
-	 router["GET"] = getRouter 
-	 router["POST"] = postRouter 
-	 router["PUT"] = putRouter 
-	 router["DELETE"] = deleteRouter
 	return &Core{router: router}
 }
 
@@ -55,26 +50,30 @@ func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 
 // 對應 Method = Get
 func (c *Core) Get(url string, handler ControllerHandler) {
-	upperUrl := strings.ToUpper(url)
-	c.router["GET"][upperUrl] = handler
+	if err := c.router["GET"].AddRouter(url, handler); err != nil { 
+		log.Fatal("add router error: ", err) 
+	}
   }
   
   // 對應 Method = POST
   func (c *Core) Post(url string, handler ControllerHandler) {
-	upperUrl := strings.ToUpper(url)
-	c.router["POST"][upperUrl] = handler
+	if err := c.router["POST"].AddRouter(url, handler); err != nil { 
+		log.Fatal("add router error: ", err) 
+	}
   }
   
   // 對應 Method = PUT
   func (c *Core) Put(url string, handler ControllerHandler) {
-	upperUrl := strings.ToUpper(url)
-	c.router["PUT"][upperUrl] = handler
+	if err := c.router["PUT"].AddRouter(url, handler); err != nil { 
+		log.Fatal("add router error: ", err) 
+	}
   }
   
   // 對應 Method = DELETE
   func (c *Core) Delete(url string, handler ControllerHandler) {
-	upperUrl := strings.ToUpper(url)
-	c.router["DELETE"][upperUrl] = handler
+	if err := c.router["DELETE"].AddRouter(url, handler); err != nil { 
+		log.Fatal("add router error: ", err) 
+	}
   }
 
 // #endregion
@@ -88,16 +87,14 @@ func (c *Core) FindRouteByRequest(request *http.Request) ControllerHandler {
 	uri := request.URL.Path
 	method := request.Method
 
-	// uri 和 method 全部轉換為大寫
+	// method 全部轉換為大寫
 	upperMethod := strings.ToUpper(method)
-	upperUri := strings.ToUpper(uri)
+
   
 	// 查找第一層map
-	if methodHandlers, ok := c.router[upperMethod]; ok {
-	  // 查找第二層map
-	  if handler, ok := methodHandlers[upperUri]; ok {
-		return handler
-	  }
+	if methodHandlers, ok := c.router[upperMethod]; ok{
+		return methodHandlers.FindHandler(uri)
 	}
+	
 	return nil
   }
