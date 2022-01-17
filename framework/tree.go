@@ -14,6 +14,8 @@ type node struct{
 	childs []*node // 這個節點下的子節點
 }
 
+
+
 // 判斷一個 segment 是否為通用的 segement
 func isWildSegmemt(segment string) bool{
 	return strings.HasPrefix(segment,":")
@@ -65,6 +67,29 @@ func (n *node) matchNode(uri string) *node{
 
 	// 如果 segments len == 1,代表為最後一個標記
 	if len(segments)==1{
-		
+		// 如果此 segment 是最後一個節點，則判斷這些 cnode 是否有 isLast 的 flag
+		for _, tn := range cnodes{
+			if tn.isLast{
+				return tn
+			}
+		}
+
+		//假如都不是最後一個節點
+		return nil
 	}
+
+	// 如果有2個segment，遞迴每個子節點繼續向下查找
+	for _, tn := range cnodes{
+		tnMatch := tn.matchNode(segments[1])
+		if tnMatch != nil{
+			return tnMatch
+		}
+	}
+
+	return nil
 }
+
+
+
+
+
