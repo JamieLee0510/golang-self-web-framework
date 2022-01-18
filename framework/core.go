@@ -24,13 +24,19 @@ func NewCore() *Core{
 	return &Core{router: router}
 }
 
-//Core的成員函數宣告
+//所有請求都進入這個函數,這個函數負責路由分發
 func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	log.Println("core.serveHTTP")
 	// 封裝自定義的context
 	ctx := NewContext(request, response)
 
 	// 尋找路由
+	handlers := c.FindRouteByRequest(request)
+	if handlers == nil { 
+		// 如果没有找到，这里打印日志 
+		ctx.Json(404, "not found") 
+		return 
+	}
 	router := c.FindRouteByRequest(request) 
 	if router == nil { 
 		// 如果沒有找到，log 
@@ -82,7 +88,7 @@ func (c *Core) Get(url string, handler ControllerHandler) {
 
 
 // 匹配路由，如果沒有匹配到，則return nil
-func (c *Core) FindRouteByRequest(request *http.Request) ControllerHandler {
+func (c *Core) FindRouteByRequest(request *http.Request) []ControllerHandler {
 
 	uri := request.URL.Path
 	method := request.Method
