@@ -12,6 +12,7 @@ type IGroup interface {
 type Group struct { 
 	core *Core 
 	prefix string
+	middlewares []ControllerHandler
 }
 
 // 初始化 Group
@@ -21,6 +22,12 @@ func NewGroup(core *Core, prefix string) *Group{
 		prefix: prefix,
 	}
 }
+
+
+// 註冊中間件
+func (g *Group) Use(middlewares ...ControllerHandler) {
+	g.middlewares = append(g.middlewares, middlewares...)
+ }
 
 // 實現Get方法
 func (g *Group) Get(uri string, handler ControllerHandler) { 

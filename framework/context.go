@@ -69,6 +69,11 @@ func (ctx *Context) WriterMux() *sync.Mutex {
 	return ctx.writerMux
 }
 
+// 為context設置handlers
+func (ctx *Context) SetHandlers(handlers []ControllerHandler) {
+	ctx.handlers = handlers
+}
+
 //#endregion
 
 func (ctx *Context) BaseContext() context.Context{
