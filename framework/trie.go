@@ -12,8 +12,9 @@ type Tree struct{
 
 type node struct{
 	isLast bool  //是否為葉子節點，代表是否為最終路由規則
-	segment string // 該路由的某段字符串
-	handler ControllerHandler // 這個節點中包含的handler，用於最終加載
+	segment string //uri中的字符串
+	handlers []ControllerHandler // 這個節點中包含的handler，用於最終加載
+								//改為hander array--> 中間件+控制器
 	childs []*node // 這個節點下的子節點
 }
 
@@ -107,7 +108,7 @@ func (n *node) matchNode(uri string) *node{
 
 
 // 增加路由節點
-func (tree *Tree) AddRouter(uri string, handler ControllerHandler) error{
+func (tree *Tree) AddRouter(uri string, handlers []ControllerHandler) error{
 	n := tree.root
 
 	//確認路由是否衝突
@@ -150,7 +151,7 @@ func (tree *Tree) AddRouter(uri string, handler ControllerHandler) error{
 
 			if isLast{
 				cnode.isLast = true
-				cnode.handler = handler
+				cnode.handlers = handlers
 			}
 
 			n.childs = append(n.childs, cnode)
@@ -165,7 +166,7 @@ func (tree *Tree) AddRouter(uri string, handler ControllerHandler) error{
 
 
 // 匹配uri
-func (tree *Tree) FindHandler(uri string) ControllerHandler{
+func (tree *Tree) FindHandler(uri string) []ControllerHandler{
 
 	//直接複用 matchNode函數
 	matchNode := tree.root.matchNode(uri)
@@ -174,7 +175,7 @@ func (tree *Tree) FindHandler(uri string) ControllerHandler{
 		return nil
 	}
 
-	return matchNode.handler
+	return matchNode.handlers
 
 }
 

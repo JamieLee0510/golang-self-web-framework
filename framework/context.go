@@ -12,7 +12,9 @@ type Context struct{
 	request *http.Request 
 	responseWriter http.ResponseWriter
 	ctx context.Context
-	handler ControllerHandler
+	// 當前請求的 hander 鏈條
+	handlers []ControllerHandler 
+	index int // 當前請求調用到 調用鏈 的哪一個節點
 
 	//是否超時的標記
 	hasTimeout bool
@@ -27,8 +29,23 @@ func NewContext(r *http.Request, w http.ResponseWriter) *Context{
 		responseWriter: w,
 		ctx: r.Context(),
 		writerMux: &sync.Mutex{},
+		index: -1, //index 初始值為-1，因為每次調用都會自增1
 	}
 }
+
+//#region  核心函數，調用context的下一個函數
+func (ctx *Context) Next() error{
+	ctx.index ++
+	if ctx.index < len(ctx.handlers){
+		if err := ctx.handlers[ctx.index](ctx); err!=nil{
+			return err
+		}
+	}
+	return nil
+}
+
+//#endregion
+
 
 //#region base function
 
@@ -50,6 +67,11 @@ func (ctx *Context) HasTimeout() bool {
 
 func (ctx *Context) WriterMux() *sync.Mutex {
 	return ctx.writerMux
+}
+
+// 為context設置handlers
+func (ctx *Context) SetHandlers(handlers []ControllerHandler) {
+	ctx.handlers = handlers
 }
 
 //#endregion
