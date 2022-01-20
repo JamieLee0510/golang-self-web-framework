@@ -97,7 +97,9 @@ func (c *Core) Get(url string, handlers ...ControllerHandler) {
 
 // #endregion
 
-
+func (c *Core) Group(prefix string) IGroup {
+	return NewGroup(c, prefix)
+}
 
 
 // 匹配路由，如果沒有匹配到，則return nil

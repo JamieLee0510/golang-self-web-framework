@@ -17,6 +17,7 @@ func registerRouter(core *framework.Core) {
 		subjectApi.Get("/:id", SubjectGetController) 
 		subjectApi.Get("/list/all", SubjectListController)
 	}
+	// subjectApi.Use(middleware.Test3())
 
-	//
+
 }
