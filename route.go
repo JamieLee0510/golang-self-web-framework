@@ -2,6 +2,7 @@ package main
 
 import (
 	"selfmade-webframework/framework"
+	"selfmade-webframework/framework/middleware"
 )
 
 func registerRouter(core *framework.Core) {
@@ -14,9 +15,11 @@ func registerRouter(core *framework.Core) {
 		// 動態路由area 
 		subjectApi.Delete("/:id", SubjectDelController) 
 		subjectApi.Put("/:id", SubjectUpdateController) 
-		subjectApi.Get("/:id", SubjectGetController) 
+		// 在group中使用middleware.Test3() 為單個路由建立中間件   
+		subjectApi.Get("/:id", middleware.Test3(), SubjectGetController)
 		subjectApi.Get("/list/all", SubjectListController)
 	}
+	// subjectApi.Use(middleware.Test3())
 
-	//
+
 }

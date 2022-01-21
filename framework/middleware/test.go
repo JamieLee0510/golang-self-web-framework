@@ -26,4 +26,15 @@ func Test1() framework.ControllerHandler {
 	  return nil
 	}
   }
+
+  func Test3() framework.ControllerHandler {
+	// 使用函數回調
+	return func(c *framework.Context) error {
+	  fmt.Println("middleware pre test2")
+	  c.Next() // 調用Next()往下調用，讓contxt.index自增
+	  fmt.Println("middleware post test2")
+	  return nil
+	}
+  }
+  
   
