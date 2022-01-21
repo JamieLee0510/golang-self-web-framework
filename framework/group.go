@@ -2,10 +2,10 @@ package framework
 
 // IGroup 代表前缀分组 接口
 type IGroup interface {
-	Get(string, ControllerHandler)
-	Post(string, ControllerHandler)
-	Put(string, ControllerHandler)
-	Delete(string, ControllerHandler)
+	Get(string, ...ControllerHandler)
+	Post(string, ...ControllerHandler)
+	Put(string, ...ControllerHandler)
+	Delete(string, ...ControllerHandler)
 
 	//實現嵌套group
 	Group(string) IGroup
@@ -27,6 +27,7 @@ func NewGroup(core *Core, prefix string) *Group{
 		core:   core,
 		parent: nil,
 		prefix: prefix,
+		middlewares: []ControllerHandler{},
 	}
 }
 
@@ -36,28 +37,42 @@ func (g *Group) Use(middlewares ...ControllerHandler) {
 	g.middlewares = append(g.middlewares, middlewares...)
  }
 
+// 獲取某個 group 的 middlewares
+// 這裏就是獲取除了 Get/Post/Put/Delete 之外設置的 middleware
+func (g *Group) getMiddlewares() []ControllerHandler {
+	if g.parent == nil {
+		return g.middlewares
+	}
+
+	return append(g.parent.getMiddlewares(), g.middlewares...)
+}
+
 // 實現Get方法
-func (g *Group) Get(uri string, handler ControllerHandler) { 
+func (g *Group) Get(uri string, handlers ...ControllerHandler) { 
 	uri = g.getAbsolutePrefix() + uri
-	g.core.Get(uri, handler)
+	allHandlers := append(g.getMiddlewares(), handlers...)
+	g.core.Get(uri, allHandlers...)
 }
 
 // 實現Post方法
-func (g *Group) Post(uri string, handler ControllerHandler) { 
+func (g *Group) Post(uri string, handlers ...ControllerHandler) { 
 	uri = g.getAbsolutePrefix() + uri
-	g.core.Post(uri, handler)
+	allHandlers := append(g.getMiddlewares(), handlers...)
+	g.core.Post(uri, allHandlers...)
 }
 
 // 實現Put方法
-func (g *Group) Put(uri string, handler ControllerHandler) { 
+func (g *Group) Put(uri string, handlers ...ControllerHandler) { 
 	uri = g.getAbsolutePrefix() + uri
-	g.core.Put(uri, handler)
+	allHandlers := append(g.getMiddlewares(), handlers...)
+	g.core.Put(uri, allHandlers...)
 }
 
 // 實現Delete方法
-func (g *Group) Delete(uri string, handler ControllerHandler) { 
+func (g *Group) Delete(uri string, handlers ...ControllerHandler) { 
 	uri = g.getAbsolutePrefix() + uri
-	g.core.Delete(uri, handler)
+	allHandlers := append(g.getMiddlewares(), handlers...)
+	g.core.Delete(uri, allHandlers...)
 }
 
 // 獲取當前group的絕對路徑（遞迴）
