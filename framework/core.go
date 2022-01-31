@@ -25,6 +25,23 @@ func NewCore() *Core{
 	return &Core{router: router}
 }
 
+
+// 匹配路由，如果沒有匹配到路由，則返回 nil
+func (c *Core) FindRouteNodeByRequest(request *http.Request) *node{
+	// uri 和 method 全部轉換成大寫，避免大小寫敏感
+	uri := request.URL.Path
+	method := request.Method
+	upperMethod := strings.ToUpper(method)
+
+	//查找第一層 map
+	if methodHandlers, ok := c.router[upperMethod]; ok{
+		return methodHandlers.root.matchNode(uri)
+	}
+
+	return nil
+
+}
+
 //所有請求都進入這個函數,這個函數負責路由分發
 func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	log.Println("core.serveHTTP")
@@ -32,16 +49,18 @@ func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	ctx := NewContext(request, response)
 
 	// 尋找路由
-	handlers := c.FindRouteByRequest(request)
-
-	if handlers == nil { 
-		// 如果没有找到，这里打印日志 
+	node := c.FindRouteNodeByRequest(request)
+	if node == nil{
+		// 如果没有找到，print log
 		ctx.Json(404, "not found") 
 		return 
 	}
+	ctx.SetHandlers(node.handlers)
 
-	// 設置context中的handlers
-	ctx.SetHandlers(handlers)
+	// 設置路由參數
+	params := node.parseParamsFromEndNode(request.URL.Path)
+	ctx.setParams(params)
+
 
 	// 調用路函數，如果返回err 代表存在內部c錯誤，返回 500 status
 	if err := ctx.Next(); err != nil {
@@ -101,21 +120,3 @@ func (c *Core) Group(prefix string) IGroup {
 	return NewGroup(c, prefix)
 }
 
-
-// 匹配路由，如果沒有匹配到，則return nil
-func (c *Core) FindRouteByRequest(request *http.Request) []ControllerHandler {
-
-	uri := request.URL.Path
-	method := request.Method
-
-	// method 全部轉換為大寫
-	upperMethod := strings.ToUpper(method)
-
-  
-	// 查找第一層map
-	if methodHandlers, ok := c.router[upperMethod]; ok{
-		return methodHandlers.FindHandler(uri)
-	}
-	
-	return nil
-  }
