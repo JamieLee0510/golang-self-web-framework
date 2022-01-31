@@ -12,14 +12,19 @@ type Context struct{
 	request *http.Request 
 	responseWriter http.ResponseWriter
 	ctx context.Context
+
 	// 當前請求的 hander 鏈條
 	handlers []ControllerHandler 
 	index int // 當前請求調用到 調用鏈 的哪一個節點
+
+	params map[string]string // url 路由匹配的參數
 
 	//是否超時的標記
 	hasTimeout bool
 	//寫保護機制
 	writerMux *sync.Mutex
+
+
 }
 
 //context newer
@@ -72,6 +77,11 @@ func (ctx *Context) WriterMux() *sync.Mutex {
 // 為context設置handlers
 func (ctx *Context) SetHandlers(handlers []ControllerHandler) {
 	ctx.handlers = handlers
+}
+
+// 為context設置params
+func (ctx *Context) setParams(params map[string]string){
+	ctx.params = params
 }
 
 //#endregion

@@ -1,6 +1,11 @@
 package framework
 
 import (
+	"bytes"
+	"encoding/json"
+	"encoding/xml"
+	"errors"
+	"io/ioutil"
 	"mime/multipart"
 
 	"github.com/spf13/cast"
@@ -78,7 +83,7 @@ func (ctx *Context) QueryAll() map[string][]string{
 
 // 請求地址uri中帶的參數
 // ex: foo.com?a=1&b=bar&c[]=bar
-// #region
+// #region 請求的相關接口實現 
 
 // 獲取int類型的參數
 func (ctx *Context) QueryInt(key string, def int) (int, bool){
@@ -162,7 +167,111 @@ func (ctx *Context) Query(key string) interface{} {
 
 // #endregion
 
+
+// #region params related
+
+//獲取路由參數
+func (ctx *Context) Param(key string) interface{}{
+	if ctx.params != nil{
+		if val, ok := ctx.params[key]; ok{
+			return val
+		}
+	}
+
+	return nil
+}
+
 // 路由匹配中帶的參數
 // ex: /book/:id
+func (ctx *Context) ParamInt(key string, def int) (int, bool) {
+	if val := ctx.Param(key); val != nil {
+		// 通過cast進行類型轉換
+		return cast.ToInt(val), true
+	}
+	return def, false
+}
+
+func (ctx *Context) ParamInt64(key string, def int64) (int64, bool) {
+	if val := ctx.Param(key); val != nil {
+		return cast.ToInt64(val), true
+	}
+	return def, false
+}
+
+func (ctx *Context) ParamFloat64(key string, def float64) (float64, bool) {
+	if val := ctx.Param(key); val != nil {
+		return cast.ToFloat64(val), true
+	}
+	return def, false
+}
+
+func (ctx *Context) ParamFloat32(key string, def float32) (float32, bool) {
+	if val := ctx.Param(key); val != nil {
+		return cast.ToFloat32(val), true
+	}
+	return def, false
+}
+
+func (ctx *Context) ParamBool(key string, def bool) (bool, bool) {
+	if val := ctx.Param(key); val != nil {
+		return cast.ToBool(val), true
+	}
+	return def, false
+}
+
+func (ctx *Context) ParamString(key string, def string) (string, bool) {
+	if val := ctx.Param(key); val != nil {
+		return cast.ToString(val), true
+	}
+	return def, false
+}
+
+// #endregion
+
+// #region bind body related
+
+//將 body 解析到 obj 結構體中
+func (ctx *Context) BindJson(obj interface{}) error{
+	if ctx.request != nil{
+		//使用 ioutil 讀取 body 中的文本
+		body, err := ioutil.ReadAll(ctx.request.Body)
+		if err != nil{
+			return err
+		}
+
+		//重新複製一份body到ctx.request裡面，為後續的邏輯處理做準備
+		ctx.request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+		//解析body到obj結構體中
+		err = json.Unmarshal(body,obj)
+		if err != nil { 
+			return err 
+		}
+	} else {
+		return errors.New("ctx.request is empty")
+	}
+	return nil
+}
+
+// xml body
+func (ctx *Context) BindXml(obj interface{}) error {
+	if ctx.request != nil {
+		body, err := ioutil.ReadAll(ctx.request.Body)
+		if err != nil {
+			return err
+		}
+		ctx.request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+		err = xml.Unmarshal(body, obj)
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("ctx.request is empty")
+	}
+	return nil
+}
+
+// #endregion
 
 
