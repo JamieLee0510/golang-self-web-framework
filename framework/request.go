@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cast"
 )
 
+const defaultMultipartMemory = 32 << 20 // 32 MB
+
 //代表請求包含的方法
 type IRequest interface{
 	//請求地址中帶的參數
@@ -274,4 +276,159 @@ func (ctx *Context) BindXml(obj interface{}) error {
 
 // #endregion
 
+// #region form related
 
+func (ctx *Context) FormAll() map[string][]string {
+	if ctx.request != nil {
+		ctx.request.ParseForm()
+		return map[string][]string(ctx.request.PostForm)
+	}
+	return map[string][]string{}
+}
+
+func (ctx *Context) FormInt64(key string, def int64) (int64, bool) {
+	params := ctx.FormAll()
+	if vals, ok := params[key]; ok {
+		if len(vals) > 0 {
+			return cast.ToInt64(vals[0]), true
+		}
+	}
+	return def, false
+}
+
+func (ctx *Context) FormFloat64(key string, def float64) (float64, bool) {
+	params := ctx.FormAll()
+	if vals, ok := params[key]; ok {
+		if len(vals) > 0 {
+			return cast.ToFloat64(vals[0]), true
+		}
+	}
+	return def, false
+}
+
+func (ctx *Context) FormFloat32(key string, def float32) (float32, bool) {
+	params := ctx.FormAll()
+	if vals, ok := params[key]; ok {
+		if len(vals) > 0 {
+			return cast.ToFloat32(vals[0]), true
+		}
+	}
+	return def, false
+}
+
+func (ctx *Context) FormBool(key string, def bool) (bool, bool) {
+	params := ctx.FormAll()
+	if vals, ok := params[key]; ok {
+		if len(vals) > 0 {
+			return cast.ToBool(vals[0]), true
+		}
+	}
+	return def, false
+}
+
+func (ctx *Context) FormStringSlice(key string, def []string) ([]string, bool) {
+	params := ctx.FormAll()
+	if vals, ok := params[key]; ok {
+		return vals, true
+	}
+	return def, false
+}
+
+func (ctx *Context) FormFile(key string) (*multipart.FileHeader, error) {
+	if ctx.request.MultipartForm == nil {
+		if err := ctx.request.ParseMultipartForm(defaultMultipartMemory); err != nil {
+			return nil, err
+		}
+	}
+	f, fh, err := ctx.request.FormFile(key)
+	if err != nil {
+		return nil, err
+	}
+	f.Close()
+	return fh, err
+}
+
+func (ctx *Context) Form(key string) interface{} {
+	params := ctx.FormAll()
+	if vals, ok := params[key]; ok {
+		if len(vals) > 0 {
+			return vals[0]
+		}
+	}
+	return nil
+}
+
+// #endregion
+
+
+// 其他格式
+func (ctx *Context) GetRawData() ([]byte, error) {
+	if ctx.request != nil {
+		body, err := ioutil.ReadAll(ctx.request.Body)
+		if err != nil {
+			return nil, err
+		}
+		ctx.request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		return body, nil
+	}
+	return nil, errors.New("ctx.request empty")
+}
+
+// #region Context基礎訊息
+func (ctx *Context) Uri() string {
+	return ctx.request.RequestURI
+}
+
+func (ctx *Context) Method() string {
+	return ctx.request.Method
+}
+
+func (ctx *Context) Host() string {
+	return ctx.request.URL.Host
+}
+
+func (ctx *Context) ClientIp() string {
+	r := ctx.request
+	ipAddress := r.Header.Get("X-Real-Ip")
+	if ipAddress == "" {
+		ipAddress = r.Header.Get("X-Forwarded-For")
+	}
+	if ipAddress == "" {
+		ipAddress = r.RemoteAddr
+	}
+	return ipAddress
+}
+// #endregion
+
+// #region header
+func (ctx *Context) Headers() map[string][]string {
+	return map[string][]string(ctx.request.Header)
+}
+
+func (ctx *Context) Header(key string) (string, bool) {
+	vals := ctx.request.Header.Values(key)
+	if vals == nil || len(vals) <= 0 {
+		return "", false
+	}
+	return vals[0], true
+}
+// #endregion
+
+// #region cookie
+func (ctx *Context) Cookies() map[string]string {
+	cookies := ctx.request.Cookies()
+	ret := map[string]string{}
+	for _, cookie := range cookies {
+		ret[cookie.Name] = cookie.Value
+	}
+	return ret
+}
+
+func (ctx *Context) Cookie(key string) (string, bool) {
+	cookies := ctx.Cookies()
+	if val, ok := cookies[key]; ok {
+		return val, true
+	}
+	return "", false
+}
+// #endregion
