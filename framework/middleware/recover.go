@@ -8,7 +8,8 @@ func Recover() framework.ControllerHandler{
 		// 核心在增加這個 recover 機制，捕獲 c.Next()出現的panic 
 		defer func() { 
 			if err := recover(); err != nil { 
-				c.Json(500, err) 
+				c.SetStatus(500).Json(err)
+				// c.Json(500, err) 
 			} 
 		}()
 
