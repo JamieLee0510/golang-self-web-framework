@@ -33,8 +33,7 @@ func FooControllerHandler(c *framework.Context) error {
 
 		//這裏做具體業務
 		time.Sleep(10 * time.Second)
-		c.Json(200, "ok")
-
+		c.SetOkStatus().Json("ok")
 		//新的 goroutine 結束的時候通過一個 finish channel 來告知父 goroutine
 		finish <- struct{}{}
 	}()
@@ -44,13 +43,16 @@ func FooControllerHandler(c *framework.Context) error {
 		// 監聽 panic
 		// case  p := <-panicChan:
 		case  <-panicChan:
-			c.Json(500, "panic")
+			c.SetStatus(500).Json("panic")
 		// 監聽結束事件
 	  	case <-finish:
 			fmt.Println("finish")
 		// 監聽超時事件
 	  	case <-durationCtx.Done():
-			c.Json(500, "time out")
+			c.WriterMux().Lock()
+			defer c.WriterMux().Unlock()
+			c.SetStatus(500).Json("time out")
+			c.SetHasTimeout()
 	  }
 	  return nil
 

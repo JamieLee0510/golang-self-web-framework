@@ -52,7 +52,7 @@ func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 	node := c.FindRouteNodeByRequest(request)
 	if node == nil{
 		// 如果没有找到，print log
-		ctx.Json(404, "not found") 
+		ctx.SetStatus(404).Json("not found")
 		return 
 	}
 	ctx.SetHandlers(node.handlers)
@@ -64,7 +64,7 @@ func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request){
 
 	// 調用路函數，如果返回err 代表存在內部c錯誤，返回 500 status
 	if err := ctx.Next(); err != nil {
-		ctx.Json(500, "inner error")
+		ctx.SetStatus(500).Json("inner error")
 		return
 	}
 }

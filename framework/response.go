@@ -21,7 +21,7 @@ type IResponse interface{
 	Jsonp(obj interface{}) IResponse
 	
 	// xml 輸出
-	xml(obj interface{}) IResponse
+	Xml(obj interface{}) IResponse
 
 	// html 輸出
 	Html(template string,obj interface{}) IResponse

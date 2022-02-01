@@ -1,9 +1,15 @@
 package main
 
-import "selfmade-webframework/framework"
+import (
+	"selfmade-webframework/framework"
+	"time"
+)
 
 func UserLoginController(c *framework.Context) error{
-	// 打印控制器名字 
-	c.Json(200, "ok, UserLoginController") 
+	foo, _ := c.QueryString("foo", "def") 
+	// 等待10s才结束执行 
+	time.Sleep(10 * time.Second) 
+	// 输出结果 
+	c.SetOkStatus().Json("ok, UserLoginController: " + foo) 
 	return nil
 }
