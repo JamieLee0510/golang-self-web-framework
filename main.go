@@ -6,19 +6,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"selfmade-webframework/framework"
-	"selfmade-webframework/framework/middleware"
+	"selfmade-webframework/framework/framework/gin"
 	"syscall"
 )
 
 func main(){
-	core := framework.NewCore()
+	core := gin.New()
 	// core 中使用 use 註冊中間件
-	core.Use( 
-		middleware.Test1(), 
-		middleware.Test2(),
-		middleware.Recover(),
-	)
+	core.Use(gin.Recovery())
 	registerRouter(core)
 	server := &http.Server{
 		Handler: core,
