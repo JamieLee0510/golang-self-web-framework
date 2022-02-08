@@ -1,7 +1,7 @@
 package main
 
 import (
-	"selfmade-webframework/framework"
+	"selfmade-webframework/framework/framework"
 	"time"
 )
 

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"selfmade-webframework/framework"
+	"selfmade-webframework/framework/framework"
 )
 
 /// 測試用的中間件

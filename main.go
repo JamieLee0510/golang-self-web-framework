@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"selfmade-webframework/framework"
-	"selfmade-webframework/framework/middleware"
+	"selfmade-webframework/framework/framework"
+	"selfmade-webframework/framework/framework/middleware"
 	"syscall"
 )
 

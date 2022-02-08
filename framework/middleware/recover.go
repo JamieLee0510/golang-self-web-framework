@@ -1,6 +1,6 @@
 package middleware
 
-import "selfmade-webframework/framework"
+import "selfmade-webframework/framework/framework"
 
 func Recover() framework.ControllerHandler{
 	//使用函數回調

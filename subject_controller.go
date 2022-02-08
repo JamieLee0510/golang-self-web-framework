@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"selfmade-webframework/framework"
+	"selfmade-webframework/framework/framework"
 )
 
 func SubjectAddController(c *framework.Context) error {

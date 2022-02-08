@@ -1,8 +1,8 @@
 package main
 
 import (
-	"selfmade-webframework/framework"
-	"selfmade-webframework/framework/middleware"
+	"selfmade-webframework/framework/framework"
+	"selfmade-webframework/framework/framework/middleware"
 )
 
 func registerRouter(core *framework.Core) {
