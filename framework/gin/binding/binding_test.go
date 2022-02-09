@@ -21,8 +21,8 @@ import (
 
 	"selfmade-webframework/framework/gin/testdata/protoexample"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 )
 
 type appkey struct {

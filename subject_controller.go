@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"selfmade-webframework/framework/framework/gin"
+	"selfmade-webframework/framework/gin"
 )
 
 func SubjectAddController(c *gin.Context) {
