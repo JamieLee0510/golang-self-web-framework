@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"selfmade-webframework/framework/framework/gin"
+	"selfmade-webframework/framework/gin"
 )
 
 /// 測試用的中間件

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"selfmade-webframework/framework/framework/gin"
-	"selfmade-webframework/framework/framework/middleware"
+	"selfmade-webframework/framework/gin"
+	"selfmade-webframework/framework/middleware"
 )
 
 func registerRouter(core *gin.Engine) {

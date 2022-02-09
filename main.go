@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"selfmade-webframework/framework/framework/gin"
+	"selfmade-webframework/framework/gin"
 	"syscall"
 )
 
