@@ -40,6 +40,15 @@ type DingContainer struct{
 
 }
 
+// NewDineContainer 創建一個服務容器
+func NewDingContainer() *DingContainer {
+	return &DingContainer{
+		providers: map[string]ServiceProvider{},
+		instances: map[string]interface{}{},
+		lock:      sync.RWMutex{},
+	}
+}
+
 //Bind 將key和serviceProvider作綁定
 func (dingContainer *DingContainer)Bind(provider ServiceProvider)error{
 	dingContainer.lock.Lock()
