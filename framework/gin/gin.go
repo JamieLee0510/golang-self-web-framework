@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 
+	"selfmade-webframework/framework"
 	"selfmade-webframework/framework/gin/internal/bytesconv"
 	"selfmade-webframework/framework/gin/render"
 )
@@ -55,6 +56,9 @@ type RoutesInfo []RouteInfo
 // Engine is the framework's instance, it contains the muxer, middleware and configuration settings.
 // Create an instance of Engine, by using New() or Default()
 type Engine struct {
+	// 服務容器
+	container framework.Container
+
 	RouterGroup
 
 	// Enables automatic redirection if the current route can't be matched but a
@@ -133,6 +137,7 @@ type Engine struct {
 	trees            methodTrees
 	maxParams        uint16
 	trustedCIDRs     []*net.IPNet
+
 }
 
 var _ IRouter = &Engine{}
@@ -153,6 +158,8 @@ func New() *Engine {
 			basePath: "/",
 			root:     true,
 		},
+		//注入Container
+		container :framework.NewDingContainer(),
 		FuncMap:                template.FuncMap{},
 		RedirectTrailingSlash:  true,
 		RedirectFixedPath:      false,
@@ -186,7 +193,8 @@ func Default() *Engine {
 
 func (engine *Engine) allocateContext() *Context {
 	v := make(Params, 0, engine.maxParams)
-	return &Context{engine: engine, params: &v}
+	// 在分配新的 Context 時，注入了 container
+	return &Context{engine: engine, params: &v, container:engine.container}
 }
 
 // Delims sets template left and right delims and returns a Engine instance.

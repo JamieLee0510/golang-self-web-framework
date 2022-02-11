@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"selfmade-webframework/framework"
 	"selfmade-webframework/framework/gin/binding"
 	"selfmade-webframework/framework/gin/render"
 
@@ -45,6 +46,9 @@ const abortIndex int8 = math.MaxInt8 / 2
 // Context is the most important part of gin. It allows us to pass variables between middleware,
 // manage the flow, validate the JSON of a request and render a JSON response for example.
 type Context struct {
+	// Context中保存容器
+	container framework.Container
+
 	writermem responseWriter
 	Request   *http.Request
 	Writer    ResponseWriter
@@ -79,6 +83,8 @@ type Context struct {
 	// SameSite allows a server to define a cookie attribute making it impossible for
 	// the browser to send this cookie along with cross-site requests.
 	sameSite http.SameSite
+
+
 }
 
 /************************************/

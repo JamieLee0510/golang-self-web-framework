@@ -7,11 +7,17 @@ import (
 	"os"
 	"os/signal"
 	"selfmade-webframework/framework/gin"
+	"selfmade-webframework/provider/demo"
 	"syscall"
 )
 
 func main(){
+	// 創建engine結構
 	core := gin.New()
+
+	// 綁定具體的serviceProvider
+	core.Bind(&demo.DemoServiceProvider{})
+
 	// core 中使用 use 註冊中間件
 	core.Use(gin.Recovery())
 	registerRouter(core)

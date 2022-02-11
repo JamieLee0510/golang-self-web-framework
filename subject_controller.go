@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"selfmade-webframework/framework/gin"
+	"selfmade-webframework/provider/demo"
 )
 
 func SubjectAddController(c *gin.Context) {
@@ -10,7 +11,12 @@ func SubjectAddController(c *gin.Context) {
 }
 
 func SubjectListController(c *gin.Context) {
-	c.ISetOkStatus().IJson("ok, SubjectListController")
+	// 獲取 demo serviceProvider實例
+	demoService := c.MustMake(demo.Key).(demo.Service) 
+	// 調用其方法---GetFoo()
+	foo := demoService.GetFoo() 
+	// 輸出結果 
+	c.ISetOkStatus().IJson(foo)
 }
 
 func SubjectDelController(c *gin.Context) {
