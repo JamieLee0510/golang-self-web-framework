@@ -4,6 +4,7 @@ package framework
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 )
 
@@ -25,14 +26,14 @@ type Container interface{
 	MakeNew(key string, params []interface{}) (interface{}, error) 
 }
 
-
+// DingContainer是服務容器的具體實現
 type DingContainer struct{
 	Container //強制要求DingContainer直接實現Container接口
 
 	//providers 存註冊的ServiceProvider，key為字符串憑證
 	providers map[string]ServiceProvider
 
-	// instance 存具體的實力，key為字符串憑證
+	// instance 存具體的實例，key為字符串憑證
 	instances map[string]interface{}
 
 	// lock用於鎖住對容器的變更操作
@@ -49,15 +50,27 @@ func NewDingContainer() *DingContainer {
 	}
 }
 
-//Bind 將key和serviceProvider作綁定
+// PrintProviders 輸出服務容器所註冊的key
+func (dingContainer *DingContainer) PrintProviders() []string {
+	ret := []string{}
+	for _, provider := range dingContainer.providers {
+		name := provider.Name()
+
+		line := fmt.Sprint(name)
+		ret = append(ret, line)
+	}
+	return ret
+}
+
+//Bind 將key和服務容器作綁定
 func (dingContainer *DingContainer)Bind(provider ServiceProvider)error{
 	dingContainer.lock.Lock()
 	defer dingContainer.lock.Unlock()
 
 	key := provider.Name()
-
-	// if provider is not defer
-	if provider.IsDefer()==false{
+	dingContainer.providers[key] = provider
+	// IsDefer為false時，立即註冊不要延遲
+	if !provider.IsDefer(){
 		if err := provider.Boot(dingContainer); err != nil { 
 			return err
 		 }
@@ -75,6 +88,10 @@ func (dingContainer *DingContainer)Bind(provider ServiceProvider)error{
 	}
 
 	return nil
+}
+
+func (dingContainer *DingContainer) IsBind(key string) bool {
+	return dingContainer.findServiceProvider(key) != nil
 }
 
 // findServiceProvider為查詢是否有註冊過該key的serviceProvider
@@ -105,7 +122,7 @@ func (dingContainer *DingContainer) MakeNew(key string, params []interface{}) (i
 
 // newInstance進行 serciveProvider 實例化
 func (dingContainer *DingContainer) newInstance(sp ServiceProvider, params []interface{}) (interface{}, error) {
-	// force new a
+	
 	if err := sp.Boot(dingContainer); err != nil {
 		return nil, err
 	}

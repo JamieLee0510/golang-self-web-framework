@@ -10,6 +10,7 @@ func SubjectAddController(c *gin.Context) {
 	c.ISetOkStatus().IJson("ok, SubjectAddController")
 }
 
+// 對應路由 /subject/list/all
 func SubjectListController(c *gin.Context) {
 	// 獲取 demo serviceProvider實例
 	demoService := c.MustMake(demo.Key).(demo.Service) 

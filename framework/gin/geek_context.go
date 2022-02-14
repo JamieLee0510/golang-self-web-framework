@@ -15,7 +15,7 @@ func (ctx *Context) BaseContext() context.Context {
 
 // engine實現container的綁定封裝
 func (engine *Engine) Bind(provider framework.ServiceProvider) error {
-	fmt.Print("綁定色serviceProvider成功！")
+	fmt.Print("綁定serviceProvider成功！")
 	return engine.container.Bind(provider)
 }
 
