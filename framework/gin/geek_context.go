@@ -13,30 +13,30 @@ func (ctx *Context) BaseContext() context.Context {
 	return ctx.Request.Context()
 }
 
-// engine实现container的绑定封装
+// engine實現container的綁定封裝
 func (engine *Engine) Bind(provider framework.ServiceProvider) error {
-	fmt.Print("綁定色rviceProvider成功！")
+	fmt.Print("綁定色serviceProvider成功！")
 	return engine.container.Bind(provider)
 }
 
-// IsBind 关键字凭证是否已经绑定服务提供者
+// IsBind key是否已經綁定serviceProvider
 func (engine *Engine) IsBind(key string) bool {
 	return engine.container.IsBind(key)
 }
 
-// context 实现container的几个封装
+// context 實現container的幾個封裝
 
-// 实现make的封装
+// 實現Make的封裝
 func (ctx *Context) Make(key string) (interface{}, error) {
 	return ctx.container.Make(key)
 }
 
-// 实现mustMake的封装
+// 實現MustMake的封裝
 func (ctx *Context) MustMake(key string) interface{} {
 	return ctx.container.MustMake(key)
 }
 
-// 实现makenew的封装
+// 實現MakeNew的封裝
 func (ctx *Context) MakeNew(key string, params []interface{}) (interface{}, error) {
 	return ctx.container.MakeNew(key, params)
 }
